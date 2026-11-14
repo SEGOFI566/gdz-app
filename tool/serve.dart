@@ -39,6 +39,13 @@ Future<void> main(List<String> args) async {
       // APK лежит отдельно от build/web, чтобы пересборка веба его не удаляла.
       var baseDir = root;
       var relative = path.replaceFirst('/', '');
+      // Сборка для GitHub Pages использует base-href /gdz-app/ — локально
+      // отдаём те же файлы и по корню, и по этому префиксу.
+      if (relative.startsWith('gdz-app/')) {
+        relative = relative.substring('gdz-app/'.length);
+      } else if (path == '/gdz-app') {
+        relative = 'index.html';
+      }
       if (path.startsWith('/download/')) {
         baseDir = 'build/download';
         relative = path.substring('/download/'.length);

@@ -75,7 +75,22 @@ powershell -ExecutionPolicy Bypass -File tool\build_apk.ps1
 
 ## Публичный доступ
 
-Быстрый способ показать сайт людям — туннель Cloudflare (без регистрации):
+Сайт: **https://SEGOFI566.github.io/gdz-app/**
+
+Веб-версия публикуется в ветку `gh-pages`, GitHub Pages раздаёт её как
+статику. APK лежит в GitHub Releases и скачивается кнопкой «Скачать APK».
+
+Пересобрать и опубликовать сайт (нужны `git` и `gh`):
+
+```powershell
+powershell -File tool\github_pages.ps1 -Owner SEGOFI566 -Repo gdz-app
+```
+
+Скрипт заливает APK в релиз `v1.0.0`, собирает веб с `--base-href /gdz-app/`
+и ссылкой на APK из Releases, затем пушит ветку `gh-pages`.
+
+Временный адрес без GitHub — туннель Cloudflare (работает, пока запущены
+сервер и туннель):
 
 ```powershell
 # терминал 1 — сайт
@@ -85,11 +100,7 @@ dart tool\serve.dart build\web 8080
 C:\dev\cloudflared.exe tunnel --url http://localhost:8080
 ```
 
-Cloudflared выведет адрес вида `https://что-то.trycloudflare.com` —
-он работает, пока запущены сервер и туннель.
-
-Для постоянного сайта нужен хостинг: GitHub Pages, Netlify, Vercel или
-Cloudflare Pages (папка `build/web`) либо VPS с доменом.
+Cloudflared выведет адрес вида `https://что-то.trycloudflare.com`.
 
 ## Как добавить решение
 

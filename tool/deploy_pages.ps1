@@ -4,10 +4,8 @@ param(
   [string]$ApkUrl = ""
 )
 
-# Собирает веб-версию с правильным base-href и публикует её в ветку gh-pages.
-# Пример:
-#   powershell -File tool\deploy_pages.ps1 -Owner mylogin `
-#     -ApkUrl https://github.com/mylogin/gdz-app/releases/download/v1.0.0/gdz-app.apk
+# Builds the web version with the correct base-href and publishes it to gh-pages.
+# ASCII only: Windows PowerShell 5.1 reads BOM-less UTF-8 as ANSI.
 
 $ErrorActionPreference = "Stop"
 
@@ -22,10 +20,10 @@ $env:Path = "C:\dev\git\cmd;C:\dev\gh\bin;C:\dev\flutter\bin;$env:JAVA_HOME\bin;
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Push-Location $root
 try {
-  $arguments = @("build", "web", "--release", "--no-pub", "--base-href", "/$Repo/")
+  $arguments = @("build", "web", "--release", "--no-pub", "--base-href", "/$Repo/", "--no-web-resources-cdn")
   if ($ApkUrl) { $arguments += "--dart-define=APK_URL=$ApkUrl" }
 
-  Write-Host "=== flutter build web ($($arguments -join ' ')) ==="
+  Write-Host "=== flutter build web ==="
   & flutter @arguments
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -49,7 +47,7 @@ try {
   }
 
   Write-Host ""
-  Write-Host "Готово: https://$Owner.github.io/$Repo/"
+  Write-Host "Done: https://$Owner.github.io/$Repo/"
 } finally {
   Pop-Location
 }
