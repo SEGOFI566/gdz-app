@@ -1,0 +1,20 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/generated_plugin_registrant.dart
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Windows desktop
+windows/flutter/ephemeral/
+
+# Логи и временные файлы инструментов
+*.log
+tool/*.txt
+tool/*.err
