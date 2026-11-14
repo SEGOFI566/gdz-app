@@ -10,7 +10,6 @@ $id = (& gh api user --jq .id).Trim()
 Write-Host "Owner: $owner (id $id)"
 
 gh auth setup-git
-
 git config --global user.name $owner
 git config --global user.email "$id+$owner@users.noreply.github.com"
 git config --global init.defaultBranch main
@@ -20,14 +19,25 @@ if (-not (Test-Path (Join-Path $root ".git"))) {
 }
 
 git add -A
-git -c core.quotepath=false commit -m "GDZ app: catalog, solutions, web and Android builds" | Out-Null
-
-$existing = & gh repo view "$owner/gdz-app" --json name 2>$null
+git diff --cached --quiet
 if ($LASTEXITCODE -ne 0) {
+  git commit -m "GDZ app: catalog, solutions, web and Android builds" | Out-Null
+}
+
+$ErrorActionPreference = "Continue"
+gh repo view "$owner/gdz-app" --json name > $null 2>&1
+$exists = ($LASTEXITCODE -eq 0)
+$ErrorActionPreference = "Stop"
+
+if (-not $exists) {
+  Write-Host "Creating repository..."
   gh repo create "$owner/gdz-app" --public --source=. --remote=origin --push --description "GDZ app for grades 5-11: Flutter catalog of textbooks, tasks and solutions"
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } else {
-  if (-not (& git remote)) { git remote add origin "https://github.com/$owner/gdz-app.git" }
+  Write-Host "Repository exists, pushing..."
+  if (-not (git remote 2>$null)) { git remote add origin "https://github.com/$owner/gdz-app.git" }
   git push -u origin main
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 Write-Host "=== repo ==="
