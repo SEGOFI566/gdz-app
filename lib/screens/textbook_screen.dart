@@ -91,6 +91,24 @@ class _TextbookScreenState extends State<TextbookScreen> {
     }
   }
 
+  /// Быстрый выбор страницы: сетка всех страниц с диапазонами заданий.
+  Future<void> _pickPage(int pageCount, Color color, int total) async {
+    final selected = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (_) => _PagePicker(
+        pageCount: pageCount,
+        current: _page.clamp(0, pageCount - 1).toInt(),
+        pageSize: _pageSize,
+        total: total,
+        color: color,
+      ),
+    );
+    if (selected != null && mounted) _openPage(selected);
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
@@ -164,14 +182,22 @@ class _TextbookScreenState extends State<TextbookScreen> {
                 style: sectionTitleStyle(context),
               ),
               const Spacer(),
-              Text(
-                searching
-                    ? 'найдено ${matches.length}'
-                    : tasks.isEmpty
-                        ? plural(tasks.length, 'задание', 'задания', 'заданий')
-                        : '${first + 1}–$last из ${tasks.length}',
-                style: const TextStyle(fontSize: 13, color: kMuted),
-              ),
+              if (searching)
+                Text(
+                  'найдено ${matches.length}',
+                  style: const TextStyle(fontSize: 13, color: kMuted),
+                )
+              else if (tasks.isEmpty)
+                Text(
+                  plural(tasks.length, 'задание', 'задания', 'заданий'),
+                  style: const TextStyle(fontSize: 13, color: kMuted),
+                )
+              else
+                _RangePill(
+                  label: '${first + 1}–$last из ${tasks.length}',
+                  color: color,
+                  onTap: () => _pickPage(pageCount, color, tasks.length),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -216,6 +242,7 @@ class _TextbookScreenState extends State<TextbookScreen> {
               pageCount: pageCount,
               color: color,
               onChanged: _openPage,
+              onPick: () => _pickPage(pageCount, color, tasks.length),
             ),
           ],
         ],
@@ -446,18 +473,207 @@ class _TaskNumber extends StatelessWidget {
   }
 }
 
+class _RangePill extends StatelessWidget {
+  const _RangePill({
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(Icons.unfold_more_rounded, size: 16, color: color),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PagePicker extends StatelessWidget {
+  const _PagePicker({
+    required this.pageCount,
+    required this.current,
+    required this.pageSize,
+    required this.total,
+    required this.color,
+  });
+
+  final int pageCount;
+  final int current;
+  final int pageSize;
+  final int total;
+  final Color color;
+
+  String _range(int page) {
+    final first = page * pageSize + 1;
+    final last = (first + pageSize - 1).clamp(0, total);
+    return '$first–$last';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text('Выбор страницы', style: sectionTitleStyle(context)),
+                  const Spacer(),
+                  Text(
+                    '$total заданий',
+                    style: const TextStyle(fontSize: 13, color: kMuted),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Нажми на страницу, чтобы сразу перейти к её заданиям.',
+                style: TextStyle(fontSize: 13, color: kMuted),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount: pageCount,
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 1.35,
+                  ),
+                  itemBuilder: (context, index) => _PageTile(
+                    page: index,
+                    range: _range(index),
+                    selected: index == current,
+                    color: color,
+                    onTap: () => Navigator.of(context).pop(index),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PageTile extends StatelessWidget {
+  const _PageTile({
+    required this.page,
+    required this.range,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  final int page;
+  final String range;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? color : kPaper,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected ? color : const Color(0xFFE7E4EF),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${page + 1}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: selected ? Colors.white : kInk,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    range,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: selected
+                          ? Colors.white.withValues(alpha: 0.85)
+                          : kMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _Pager extends StatelessWidget {
   const _Pager({
     required this.page,
     required this.pageCount,
     required this.color,
     required this.onChanged,
+    required this.onPick,
   });
 
   final int page;
   final int pageCount;
   final Color color;
   final ValueChanged<int> onChanged;
+  final VoidCallback onPick;
 
   /// Page numbers with gaps collapsed to "…" for long books (535 tasks = 14
   /// pages), so the control always fits on one or two lines.
@@ -524,6 +740,13 @@ class _Pager extends StatelessWidget {
             tooltip: 'Следующая страница',
             enabled: page < pageCount - 1,
             onTap: () => onChanged(page + 1),
+          ),
+          IconButton(
+            tooltip: 'Все страницы',
+            onPressed: onPick,
+            icon: const Icon(Icons.grid_view_rounded),
+            color: color,
+            visualDensity: VisualDensity.compact,
           ),
         ],
       ),
