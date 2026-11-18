@@ -99,25 +99,47 @@ class AppState extends ChangeNotifier {
     return total;
   }
 
-  List<TaskItem> search(String query) {
+  /// Достаёт номер задания из запроса вида «527», «№ 527», «задание 527».
+  static String? numberQuery(String query) {
+    final match = RegExp(
+      r'^\s*(?:№|номер|задание|no\.?)?\s*(\d{1,4})\s*$',
+      caseSensitive: false,
+    ).firstMatch(query);
+    return match?.group(1);
+  }
+
+  /// Поиск по всему каталогу. Точные совпадения номера идут первыми,
+  /// затем номера, содержащие запрос, затем совпадения по тексту.
+  List<TaskItem> search(String query, {int limit = 50}) {
     final data = catalog;
     final text = query.trim().toLowerCase();
     if (data == null || text.isEmpty) return const [];
 
-    final results = <TaskItem>[];
+    final number = numberQuery(text);
+    final exact = <TaskItem>[];
+    final byNumber = <TaskItem>[];
+    final byText = <TaskItem>[];
+
     for (final task in data.tasks) {
+      if (number != null && task.number == number) {
+        exact.add(task);
+        continue;
+      }
+      if (task.number.contains(number ?? text)) {
+        byNumber.add(task);
+        continue;
+      }
+      if (number != null) continue;
       final textbook = data.textbookById[task.textbookId];
       final subject =
           textbook == null ? null : data.subjectById[textbook.subjectId];
-      final matches = task.number.toLowerCase().contains(text) ||
-          task.condition.toLowerCase().contains(text) ||
+      final matches = task.condition.toLowerCase().contains(text) ||
           (textbook?.title.toLowerCase().contains(text) ?? false) ||
           (textbook?.author.toLowerCase().contains(text) ?? false) ||
           (subject?.name.toLowerCase().contains(text) ?? false);
-      if (matches) results.add(task);
-      if (results.length >= 50) break;
+      if (matches) byText.add(task);
     }
-    return results;
+    return [...exact, ...byNumber, ...byText].take(limit).toList();
   }
 }
 

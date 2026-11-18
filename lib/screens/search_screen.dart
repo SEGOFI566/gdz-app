@@ -18,9 +18,9 @@ class _SearchScreenState extends State<SearchScreen> {
   String _query = '';
 
   static const _popular = [
+    '№ 527',
     'уравнение',
     'Пифагор',
-    '1011',
     'Крещение Руси',
     'прилагательное',
     'Present Simple',
@@ -61,13 +61,23 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'По номеру задания, условию, учебнику или теме',
+            'Номер задания, условие, учебник или тема. Номер можно вводить без «№».',
             style: TextStyle(fontSize: 13, color: kMuted),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _controller,
             onChanged: (value) => setState(() => _query = value),
+            onSubmitted: (_) {
+              // Единственный результат открываем сразу — это и есть быстрый поиск.
+              if (results.length == 1) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TaskScreen(taskId: results.first.id),
+                  ),
+                );
+              }
+            },
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: 'Например: № 124 или уравнение',

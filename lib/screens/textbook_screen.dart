@@ -6,18 +6,98 @@ import '../theme.dart';
 import '../widgets/empty_state.dart';
 import 'task_screen.dart';
 
-class TextbookScreen extends StatelessWidget {
+class TextbookScreen extends StatefulWidget {
   const TextbookScreen({super.key, required this.textbookId});
 
   final String textbookId;
 
   @override
+  State<TextbookScreen> createState() => _TextbookScreenState();
+}
+
+class _TextbookScreenState extends State<TextbookScreen> {
+  /// 40 tasks = 10 rows of the 4-column grid.
+  static const _pageSize = 40;
+
+  final _gridKey = GlobalKey();
+  final _searchController = TextEditingController();
+  int _page = 0;
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TextbookScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.textbookId != widget.textbookId) {
+      _page = 0;
+      _query = '';
+      _searchController.clear();
+    }
+  }
+
+  /// Фильтр внутри учебника: номер («527», «№ 527») или слово из условия.
+  List<TaskItem> _matches(List<TaskItem> tasks, String query) {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return const [];
+    final number = AppState.numberQuery(trimmed);
+    if (number != null) {
+      final exact = <TaskItem>[];
+      final partial = <TaskItem>[];
+      for (final task in tasks) {
+        if (task.number == number) {
+          exact.add(task);
+        } else if (task.number.contains(number)) {
+          partial.add(task);
+        }
+      }
+      return [...exact, ...partial];
+    }
+    final text = trimmed.toLowerCase();
+    return tasks
+        .where((task) => task.condition.toLowerCase().contains(text))
+        .toList();
+  }
+
+  void _openTask(TaskItem task) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => TaskScreen(taskId: task.id)),
+    );
+  }
+
+  /// Enter открывает единственное найденное задание.
+  void _openFirstMatch(List<TaskItem> matches) {
+    if (matches.length == 1) _openTask(matches.first);
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() => _query = '');
+  }
+
+  void _openPage(int page) {
+    setState(() => _page = page);
+    final anchor = _gridKey.currentContext;
+    if (anchor != null) {
+      Scrollable.ensureVisible(
+        anchor,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
-    final textbook = state.textbookById(textbookId);
+    final textbook = state.textbookById(widget.textbookId);
     final subject =
         textbook == null ? null : state.subjectById(textbook.subjectId);
-    final tasks = state.tasksFor(textbookId);
+    final tasks = state.tasksFor(widget.textbookId);
     final color = textbook?.color ?? kAccent;
 
     if (textbook == null) {
@@ -31,6 +111,19 @@ class TextbookScreen extends StatelessWidget {
       );
     }
 
+    final pageCount =
+        tasks.isEmpty ? 1 : (tasks.length + _pageSize - 1) ~/ _pageSize;
+    final page = _page.clamp(0, pageCount - 1).toInt();
+    final first = page * _pageSize;
+    final visible = tasks.skip(first).take(_pageSize).toList();
+    final last = first + visible.length;
+
+    final query = _query.trim();
+    final searching = query.isNotEmpty;
+    final matches = searching ? _matches(tasks, query) : const <TaskItem>[];
+    final shown = searching ? matches : visible;
+    final exactNumber = searching ? AppState.numberQuery(query) : null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -43,44 +136,61 @@ class TextbookScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
         children: [
           _BookHeader(textbook: textbook, taskCount: tasks.length),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _searchController,
+            onChanged: (value) => setState(() => _query = value),
+            onSubmitted: (_) => _openFirstMatch(matches),
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: 'Быстрый поиск: № 527 или слово из задания',
+              prefixIcon: const Icon(Icons.bolt_rounded, color: kMuted),
+              suffixIcon: searching
+                  ? IconButton(
+                      tooltip: 'Сбросить поиск',
+                      onPressed: _clearSearch,
+                      icon: const Icon(Icons.close_rounded, color: kMuted),
+                    )
+                  : null,
+            ),
+          ),
           const SizedBox(height: 22),
           Row(
+            key: _gridKey,
             children: [
-              Text('Задания', style: sectionTitleStyle(context)),
+              Text(
+                searching ? 'Результаты' : 'Задания',
+                style: sectionTitleStyle(context),
+              ),
               const Spacer(),
               Text(
-                plural(tasks.length, 'задание', 'задания', 'заданий'),
+                searching
+                    ? 'найдено ${matches.length}'
+                    : tasks.isEmpty
+                        ? plural(tasks.length, 'задание', 'задания', 'заданий')
+                        : '${first + 1}–$last из ${tasks.length}',
                 style: const TextStyle(fontSize: 13, color: kMuted),
               ),
             ],
           ),
           const SizedBox(height: 12),
           if (tasks.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFE7E4EF)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.pending_actions_rounded, color: kMuted),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Решения для этого учебника ещё готовятся.',
-                      style: TextStyle(fontSize: 13, color: kMuted),
-                    ),
-                  ),
-                ],
-              ),
+            const _HintCard(
+              icon: Icons.pending_actions_rounded,
+              text: 'Решения для этого учебника ещё готовятся.',
+            )
+          else if (searching && matches.isEmpty)
+            _HintCard(
+              icon: Icons.search_off_rounded,
+              text: 'По запросу «$query» ничего не нашлось. '
+                  'Проверь номер задания или введи слово из условия.',
             )
           else
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: tasks.length,
+              itemCount: shown.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 mainAxisSpacing: 10,
@@ -88,22 +198,26 @@ class TextbookScreen extends StatelessWidget {
                 childAspectRatio: 1.05,
               ),
               itemBuilder: (context, index) {
-                final task = tasks[index];
+                final task = shown[index];
                 final favorite = state.isFavorite(task.id);
                 return _TaskNumber(
                   task: task,
                   color: color,
                   favorite: favorite,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => TaskScreen(taskId: task.id),
-                      ),
-                    );
-                  },
+                  highlight: searching && task.number == exactNumber,
+                  onTap: () => _openTask(task),
                 );
               },
             ),
+          if (!searching && pageCount > 1) ...[
+            const SizedBox(height: 18),
+            _Pager(
+              page: page,
+              pageCount: pageCount,
+              color: color,
+              onChanged: _openPage,
+            ),
+          ],
         ],
       ),
     );
@@ -243,23 +357,56 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
+class _HintCard extends StatelessWidget {
+  const _HintCard({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE7E4EF)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: kMuted),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 13, color: kMuted),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TaskNumber extends StatelessWidget {
   const _TaskNumber({
     required this.task,
     required this.color,
     required this.favorite,
     required this.onTap,
+    this.highlight = false,
   });
 
   final TaskItem task;
   final Color color;
   final bool favorite;
   final VoidCallback onTap;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: highlight ? color.withValues(alpha: 0.10) : Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -267,17 +414,20 @@ class _TaskNumber extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE7E4EF)),
+            border: Border.all(
+              color: highlight ? color : const Color(0xFFE7E4EF),
+              width: highlight ? 1.6 : 1,
+            ),
           ),
           child: Stack(
             children: [
               Center(
                 child: Text(
                   task.number,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: kInk,
+                    color: highlight ? color : kInk,
                   ),
                 ),
               ),
@@ -289,6 +439,156 @@ class _TaskNumber extends StatelessWidget {
                       size: 12, color: color),
                 ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Pager extends StatelessWidget {
+  const _Pager({
+    required this.page,
+    required this.pageCount,
+    required this.color,
+    required this.onChanged,
+  });
+
+  final int page;
+  final int pageCount;
+  final Color color;
+  final ValueChanged<int> onChanged;
+
+  /// Page numbers with gaps collapsed to "…" for long books (535 tasks = 14
+  /// pages), so the control always fits on one or two lines.
+  List<int?> get _items {
+    if (pageCount <= 7) {
+      return [for (var i = 0; i < pageCount; i++) i];
+    }
+    final wanted = <int>{0, pageCount - 1};
+    for (var delta = -2; delta <= 2; delta++) {
+      wanted.add(page + delta);
+    }
+    final valid = wanted.where((i) => i >= 0 && i < pageCount).toList()..sort();
+    final items = <int?>[];
+    int? previous;
+    for (final index in valid) {
+      if (previous != null && index - previous > 1) items.add(null);
+      items.add(index);
+      previous = index;
+    }
+    return items;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE7E4EF)),
+      ),
+      child: Row(
+        children: [
+          _PagerArrow(
+            icon: Icons.chevron_left_rounded,
+            tooltip: 'Предыдущая страница',
+            enabled: page > 0,
+            onTap: () => onChanged(page - 1),
+          ),
+          Expanded(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final item in _items)
+                  if (item == null)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 2),
+                      child: Text('…', style: TextStyle(color: kMuted)),
+                    )
+                  else
+                    _PageChip(
+                      label: '${item + 1}',
+                      selected: item == page,
+                      color: color,
+                      onTap: () => onChanged(item),
+                    ),
+              ],
+            ),
+          ),
+          _PagerArrow(
+            icon: Icons.chevron_right_rounded,
+            tooltip: 'Следующая страница',
+            enabled: page < pageCount - 1,
+            onTap: () => onChanged(page + 1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PagerArrow extends StatelessWidget {
+  const _PagerArrow({
+    required this.icon,
+    required this.tooltip,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: enabled ? onTap : null,
+      icon: Icon(icon),
+      color: kInk,
+      disabledColor: const Color(0xFFC9C5D6),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+class _PageChip extends StatelessWidget {
+  const _PageChip({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? color : kPaper,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 34),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: selected ? Colors.white : kInk,
+            ),
           ),
         ),
       ),
