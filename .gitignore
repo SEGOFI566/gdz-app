@@ -18,3 +18,23 @@ windows/flutter/ephemeral/
 *.log
 tool/*.txt
 tool/*.err
+
+# Сканы учебников, OCR и промежуточные выгрузки краулера
+tool/*.pdf
+tool/img2011/
+tool/img2022/
+tool/ocr25/
+tool/ocr_margin/
+tool/ocr_marg2/
+tool/ocr_pages/
+tool/ocr_s3/
+tool/pages/
+tool/pg-*.jpg
+tool/ocr_src_*.jpg
+tool/ocr_*.json
+tool/map_partial.json
+tool/*.zip
+tool/*.exe
+tool/*.traineddata
+tool/budu5_new.json
+tool/budu5_failures.txt

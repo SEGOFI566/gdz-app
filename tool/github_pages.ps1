@@ -23,11 +23,21 @@ $ErrorActionPreference = "Stop"
 
 if (-not $hasRelease) {
   Write-Host "=== create release $Tag ==="
-  gh release create $Tag $apk --repo "$Owner/$Repo" --title "GDZ 1.0.0" --notes "Android APK. Catalog: 23 textbooks, 456 tasks with solutions."
+  gh release create $Tag $apk --repo "$Owner/$Repo" --title "GDZ 1.0.0" --notes "Android APK."
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } else {
-  Write-Host "Release $Tag already exists."
+  Write-Host "=== refresh APK in release $Tag ==="
+  gh release upload $Tag $apk --repo "$Owner/$Repo" --clobber
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
+
+Write-Host "=== update release notes ==="
+$ErrorActionPreference = "Continue"
+$catalog = Get-Content -Raw -Encoding UTF8 (Join-Path $root "assets\data\catalog.json") | ConvertFrom-Json
+$taskCount = $catalog.tasks.Count
+$bookCount = $catalog.textbooks.Count
+gh release edit $Tag --repo "$Owner/$Repo" --notes "Android APK. Catalog: $bookCount textbooks, $taskCount tasks with solutions."
+$ErrorActionPreference = "Stop"
 
 Write-Host "=== deploy web ==="
 & (Join-Path $PSScriptRoot "deploy_pages.ps1") -Owner $Owner -Repo $Repo -ApkUrl $apkUrl

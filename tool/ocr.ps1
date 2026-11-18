@@ -1,47 +1,62 @@
-$ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$ErrorActionPreference = "Stop"
+Add-Type -AssemblyName System.Drawing
 
-$asTaskGeneric = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {
-  $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1'
-})[0]
+# OCR the two textbook photos via OCR.space (free test key).
+# ASCII-only script: paths are built from $env:USERPROFILE.
 
-function Await($WinRtTask, $ResultType) {
-  $asTask = $asTaskGeneric.MakeGenericMethod($ResultType)
-  $netTask = $asTask.Invoke($null, @($WinRtTask))
-  $netTask.Wait(-1) | Out-Null
-  $netTask.Result
-}
+$files = @(
+  (Join-Path $env:USERPROFILE "Downloads\12ee08f8-ade0-4fa2-bd70-5acc7c080c08.jpg"),
+  (Join-Path $env:USERPROFILE "Downloads\51a14238-274f-4803-bfaf-078fe8294086.jpg")
+)
 
-$lang = New-Object Windows.Globalization.Language 'ru'
-$engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($lang)
-if (-not $engine) { throw 'Russian OCR engine unavailable' }
-
-$dir = 'C:\Users\мира\Downloads'
-$files = Get-ChildItem $dir -Filter *.jpg | Where-Object {
-  $_.Name -in @(
-    '51a14238-274f-4803-bfaf-078fe8294086.jpg',
-    '0e63ffa4-5813-46ad-8f29-641620fa6657.jpg',
-    'ef934fc0-1772-49e6-9a76-346a95df1dde.jpg',
-    '12ee08f8-ade0-4fa2-bd70-5acc7c080c08.jpg'
-  )
-}
-
-$out = @()
+$i = 0
 foreach ($f in $files) {
-  $out += "===== $($f.Name) ====="
+  $i++
+  if (-not (Test-Path $f)) { Write-Host "missing: $f"; continue }
+
+  $img = [System.Drawing.Image]::FromFile($f)
+  $maxW = 1800
+  $scale = [Math]::Min(1.0, $maxW / $img.Width)
+  $w = [int]($img.Width * $scale)
+  $h = [int]($img.Height * $scale)
+  $bmp = New-Object System.Drawing.Bitmap $w, $h
+  $g = [System.Drawing.Graphics]::FromImage($bmp)
+  $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+  $g.DrawImage($img, 0, 0, $w, $h)
+  $g.Dispose()
+
+  $ms = New-Object System.IO.MemoryStream
+  $enc = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
+  $ps = New-Object System.Drawing.Imaging.EncoderParameters 1
+  $ps.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter ([System.Drawing.Imaging.Encoder]::Quality, [long]85)
+  $bmp.Save($ms, $enc, $ps)
+  $bmp.Dispose()
+  $img.Dispose()
+
+  $bytes = $ms.ToArray()
+  Write-Host ("file {0}: {1}x{2} jpeg {3} KB" -f $i, $w, $h, [Math]::Round($bytes.Length / 1KB))
+  $b64 = [Convert]::ToBase64String($bytes)
+
+  $body = @{
+    apikey           = "helloworld"
+    language         = "rus"
+    isOverlayRequired = "false"
+    OCREngine        = "2"
+    scale            = "true"
+    base64Image      = "data:image/jpeg;base64,$b64"
+  }
+
+  $outFile = "C:\dev\gdz_app\tool\ocr_$i.json"
   try {
-    $file = Await ([Windows.Storage.StorageFile]::GetFileFromPathAsync($f.FullName)) ([Windows.Storage.StorageFile])
-    $stream = Await ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
-    $decoder = Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
-    $bitmap = Await ($decoder.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
-    $result = Await ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
-    foreach ($line in $result.Lines) { $out += $line.Text }
-    $stream.Dispose()
+    $r = Invoke-WebRequest -Uri "https://api.ocr.space/parse/image" -Method Post -Body $body -TimeoutSec 180 -UseBasicParsing
+    [System.IO.File]::WriteAllText($outFile, $r.Content, (New-Object System.Text.UTF8Encoding($false)))
+    $parsed = $r.Content | ConvertFrom-Json
+    if ($parsed.IsErroredOnProcessing) {
+      Write-Host ("OCR error: " + ($parsed.ErrorMessage -join "; "))
+    } else {
+      Write-Host ("text chars: " + $parsed.ParsedResults[0].ParsedText.Length)
+    }
   } catch {
-    $out += "OCR ERROR: $($_.Exception.Message)"
+    Write-Host ("request failed: " + $_.Exception.Message)
   }
 }
-
-$outPath = 'C:\dev\gdz_app\tool\ocr_result.txt'
-[System.IO.File]::WriteAllLines($outPath, $out, (New-Object System.Text.UTF8Encoding($false)))
-Write-Output "written: $outPath lines=$($out.Count)"

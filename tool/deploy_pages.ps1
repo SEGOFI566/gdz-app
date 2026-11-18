@@ -17,6 +17,10 @@ $env:FLUTTER_STORAGE_BASE_URL = "https://storage.flutter-io.cn"
 $env:PUB_CACHE = "C:\dev\pub-cache"
 $env:Path = "C:\dev\git\cmd;C:\dev\gh\bin;C:\dev\flutter\bin;$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:Path"
 
+# Corporate/offline networks cannot reach the certificate revocation server,
+# which makes every push fail with CRYPT_E_REVOCATION_OFFLINE.
+git config --global http.schannelCheckRevoke false | Out-Null
+
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Push-Location $root
 try {
