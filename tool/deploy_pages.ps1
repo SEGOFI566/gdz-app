@@ -18,8 +18,9 @@ $env:PUB_CACHE = "C:\dev\pub-cache"
 $env:Path = "C:\dev\git\cmd;C:\dev\gh\bin;C:\dev\flutter\bin;$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:Path"
 
 # Corporate/offline networks cannot reach the certificate revocation server,
-# which makes every push fail with CRYPT_E_REVOCATION_OFFLINE.
-git config --global http.schannelCheckRevoke false | Out-Null
+# which makes every push fail with CRYPT_E_REVOCATION_OFFLINE. Git 2.56 ignores
+# http.schannelCheckRevoke=false, but GIT_SSL_NO_VERIFY works.
+$env:GIT_SSL_NO_VERIFY = "1"
 
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Push-Location $root
