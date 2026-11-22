@@ -19,7 +19,9 @@ const _junk = [
 /// accept for them.
 const _required = <String, int>{
   'russian-8-barkhudarov': 500,
+  'geometry-7': 400,
   'geometry-8': 400,
+  'geometry-9': 450,
 };
 
 bool _hasShareLine(String text) =>

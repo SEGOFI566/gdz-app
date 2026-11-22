@@ -20,7 +20,7 @@ if errorlevel 1 goto failed
 
 echo ==== commit ==== >> %LOG%
 git add -A >> %LOG% 2>&1
-git commit -m "data: real geometry 8 tasks (Atanasyan 2023-2026)" >> %LOG% 2>&1
+git commit -m "data: real geometry 7-9 tasks (Atanasyan 2023-2026)" >> %LOG% 2>&1
 git push origin main >> %LOG% 2>&1
 echo ==== push exit=%ERRORLEVEL% ==== >> %LOG%
 
