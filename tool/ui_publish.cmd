@@ -15,12 +15,12 @@ call C:\dev\flutter\bin\dart.bat analyze lib --no-fatal-warnings >> %LOG% 2>&1
 if errorlevel 1 goto failed
 
 echo ==== deploy pages (web only) ==== >> %LOG%
-powershell -NoProfile -ExecutionPolicy Bypass -File tool\deploy_pages.ps1 -Owner SEGOFI566 -Repo gdz-app -ApkUrl "https://github.com/SEGOFI566/gdz-app/releases/download/v1.0.0/gdz-app.apk" >> %LOG% 2>&1
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -File tool\deploy_pages.ps1 -Owner SEGOFI566 -Repo gdz-app -ApkUrl "https://github.com/SEGOFI566/gdz-app/releases/download/v1.0.0/gdz-app.apk" >> %LOG% 2>&1
 if errorlevel 1 goto failed
 
 echo ==== commit ==== >> %LOG%
 git add -A >> %LOG% 2>&1
-git commit -m "ui: pagination + quick task search" >> %LOG% 2>&1
+git commit -m "data: real geometry 8 tasks (Atanasyan 2023-2026)" >> %LOG% 2>&1
 git push origin main >> %LOG% 2>&1
 echo ==== push exit=%ERRORLEVEL% ==== >> %LOG%
 
