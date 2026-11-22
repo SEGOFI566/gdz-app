@@ -73,11 +73,12 @@ class _TaskScreenState extends State<TaskScreen> {
                   text: '${textbook.grade} класс',
                   color: accent,
                 ),
-              _Chip(
-                icon: Icons.description_rounded,
-                text: 'стр. ${task.page}',
-                color: accent,
-              ),
+              if (task.page > 0)
+                _Chip(
+                  icon: Icons.description_rounded,
+                  text: 'стр. ${task.page}',
+                  color: accent,
+                ),
             ],
           ),
           const SizedBox(height: 16),

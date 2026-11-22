@@ -9,6 +9,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$env:FLUTTER_ROOT = "C:\dev\flutter"
 $env:JAVA_HOME = "C:\dev\jdk17"
 $env:ANDROID_HOME = "C:\dev\android-sdk"
 $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
@@ -16,6 +17,12 @@ $env:PUB_HOSTED_URL = "https://pub.flutter-io.cn"
 $env:FLUTTER_STORAGE_BASE_URL = "https://storage.flutter-io.cn"
 $env:PUB_CACHE = "C:\dev\pub-cache"
 $env:Path = "C:\dev\git\cmd;C:\dev\gh\bin;C:\dev\flutter\bin;$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:Path"
+
+# The flutter.bat wrapper hangs on this machine (Git/PowerShell bootstrap),
+# so invoke the cached Flutter tool snapshot directly.
+$dart = Join-Path $env:FLUTTER_ROOT "bin\cache\dart-sdk\bin\dart.exe"
+$snapshot = Join-Path $env:FLUTTER_ROOT "bin\cache\flutter_tools.snapshot"
+$packageConfig = Join-Path $env:FLUTTER_ROOT "packages\flutter_tools\.dart_tool\package_config.json"
 
 # Corporate/offline networks cannot reach the certificate revocation server,
 # which makes every push fail with CRYPT_E_REVOCATION_OFFLINE. Git 2.56 ignores
@@ -28,8 +35,8 @@ try {
   $arguments = @("build", "web", "--release", "--no-pub", "--base-href", "/$Repo/", "--no-web-resources-cdn")
   if ($ApkUrl) { $arguments += "--dart-define=APK_URL=$ApkUrl" }
 
-  Write-Host "=== flutter build web ==="
-  & flutter @arguments
+  Write-Host "=== flutter build web (direct tool) ==="
+  & $dart --disable-dart-dev --packages=$packageConfig $snapshot @arguments
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   $pages = Join-Path (Split-Path $root -Parent) "gdz_app_pages"

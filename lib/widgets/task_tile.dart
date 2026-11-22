@@ -82,15 +82,17 @@ class TaskTile extends StatelessWidget {
                         height: 1.35,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      textbook == null
-                          ? 'стр. ${task.page}'
-                          : '${textbook.title} · стр. ${task.page}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: kMuted),
-                    ),
+                    if (task.page > 0) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        textbook == null
+                            ? 'стр. ${task.page}'
+                            : '${textbook.title} · стр. ${task.page}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11, color: kMuted),
+                      ),
+                    ],
                   ],
                 ),
               ),
