@@ -103,6 +103,14 @@ Future<void> main(List<String> args) async {
 int min(int a, int b) => a < b ? a : b;
 int max(int a, int b) => a > b ? a : b;
 
+/// budu5 panels end with a "Поделиться" share widget. It is not part of the
+/// answer, so strip it before storing steps or the final answer.
+String _clean(String text) => text
+    .split('\n')
+    .map((line) => line.trim())
+    .where((line) => line.isNotEmpty && line != 'Поделиться')
+    .join('\n');
+
 Future<Map<int, String>> _index(HttpClient client, int viewId) async {
   final body = await _get(client, '$_base/gdz/view/$viewId');
   final ids = <int, String>{};
@@ -131,15 +139,15 @@ Future<Map<String, dynamic>> _task(HttpClient client, String taskId) async {
   }
   String section(String name) => _text(_rawSection(body, heads, name));
 
-  var condition = section('Вопрос');
+  var condition = _clean(section('Вопрос'));
   condition = condition
       .replaceAll(RegExp(r'Выберите год учебника[\s\S]*?Все года[\s\S]*?'),
           '')
       .replaceAllMapped(RegExp(r'№\s*\d+\s*учебника\s*\d{4}-\d{4}\s*\(стр\.\s*\d+\):'),
           (_) => '')
       .trim();
-  final hint = section('Подсказка').trim();
-  final answer = section('Ответ').trim();
+  final hint = _clean(section('Подсказка'));
+  final answer = _clean(section('Ответ'));
   final answerRaw = _rawSection(body, heads, 'Ответ');
   final hasImage = answerRaw.contains('<img');
 

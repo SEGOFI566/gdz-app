@@ -11,7 +11,11 @@ echo ==== web publish start %DATE% %TIME% ==== > %LOG%
 echo APK is NOT rebuilt or uploaded in this run. >> %LOG%
 
 echo ==== analyze ==== >> %LOG%
-call C:\dev\flutter\bin\dart.bat analyze lib --no-fatal-warnings >> %LOG% 2>&1
+C:\dev\flutter\bin\cache\dart-sdk\bin\dart.exe analyze lib --no-fatal-warnings >> %LOG% 2>&1
+if errorlevel 1 goto failed
+
+echo ==== validate catalog ==== >> %LOG%
+C:\dev\flutter\bin\cache\dart-sdk\bin\dart.exe tool\validate_catalog.dart >> %LOG% 2>&1
 if errorlevel 1 goto failed
 
 echo ==== deploy pages (web only) ==== >> %LOG%
@@ -20,7 +24,7 @@ if errorlevel 1 goto failed
 
 echo ==== commit ==== >> %LOG%
 git add -A >> %LOG% 2>&1
-git commit -m "data: real textbook page numbers and sources" >> %LOG% 2>&1
+git commit -m "fix: clean answer text and harden catalog validation" >> %LOG% 2>&1
 git push origin main >> %LOG% 2>&1
 echo ==== push exit=%ERRORLEVEL% ==== >> %LOG%
 

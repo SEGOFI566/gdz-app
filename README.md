@@ -93,8 +93,9 @@ flutter run -d android    # телефон/эмулятор (нужен Android 
 
 ## Скачать для Android (APK)
 
-На веб-версии под поиском есть баннер **«Скачать APK»**. Он ведёт на
-`/download/gdz-app.apk`, который локальный сервер отдаёт из `build/download`.
+На веб-версии под поиском есть баннер **«Скачать APK»**. В опубликованной
+сборке он ведёт на APK из GitHub Releases (`v1.0.0`); локально можно указать
+другой адрес через `--dart-define=APK_URL=...`.
 
 Собрать APK:
 
@@ -113,14 +114,16 @@ powershell -ExecutionPolicy Bypass -File tool\build_apk.ps1
 Веб-версия публикуется в ветку `gh-pages`, GitHub Pages раздаёт её как
 статику. APK лежит в GitHub Releases и скачивается кнопкой «Скачать APK».
 
-Пересобрать и опубликовать сайт (нужны `git` и `gh`):
+Пересобрать и опубликовать только веб (APK не собирается и не загружается):
 
 ```powershell
-powershell -File tool\github_pages.ps1 -Owner SEGOFI566 -Repo gdz-app
+tool\ui_publish.cmd
 ```
 
-Скрипт заливает APK в релиз `v1.0.0`, собирает веб с `--base-href /gdz-app/`
-и ссылкой на APK из Releases, затем пушит ветку `gh-pages`.
+Скрипт проверяет каталог (`VALIDATION OK`), анализирует Dart-код, собирает
+веб через кэшированный Flutter Tools snapshot (обходит зависание `flutter.bat`
+на этой машине), пушит ветку `gh-pages` и коммитит исходники в `main`.
+APK в релизе `v1.0.0` остаётся без изменений.
 
 Временный адрес без GitHub — туннель Cloudflare (работает, пока запущены
 сервер и туннель):

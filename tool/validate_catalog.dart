@@ -6,7 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 
 const _junk = [
-  'учебника 20',
+  // Note: legitimate source labels like "№1 учебника 2023-2026 (стр. 42):"
+  // are kept in hint-style solutions, so they are not treated as junk.
   'Скачан с',
   '&nbsp',
   '&#',
@@ -50,6 +51,53 @@ void main(List<String> args) {
     }
   }
 
+  // Every task, including small textbooks, must have honest text and a
+  // solution. Page 0 is allowed: it means the printed page is unknown and
+  // the UI hides the page chip instead of inventing a number.
+  for (final task in tasks) {
+    final label = '${task['textbookId'] ?? '?'} ${task['number'] ?? task['id'] ?? ''}';
+    final condition = '${task['condition'] ?? ''}';
+    if (condition.trim().length < 20) {
+      problems.add('$label: condition too short');
+    }
+    for (final junk in _junk) {
+      if (condition.contains(junk)) {
+        problems.add('$label: junk in condition ($junk)');
+      }
+    }
+    if (_hasShareLine(condition)) {
+      problems.add('$label: share widget in condition');
+    }
+
+    final page = task['page'];
+    if (page is! num || page < 0) {
+      problems.add('$label: bad page $page');
+    }
+
+    final solutions = (task['solutions'] as List?) ?? const [];
+    if (solutions.isEmpty) {
+      problems.add('$label: no solution');
+      continue;
+    }
+    final solution = solutions.first as Map<String, dynamic>;
+    final steps = (solution['steps'] as List?) ?? const [];
+    final answer = '${solution['answer'] ?? ''}';
+    if (steps.isEmpty) problems.add('$label: no steps');
+    if (answer.trim().isEmpty) problems.add('$label: empty answer');
+    for (final step in steps) {
+      final text = '$step';
+      if (text.trim().isEmpty) problems.add('$label: empty step');
+      for (final junk in _junk) {
+        if (text.contains(junk)) problems.add('$label: junk in step ($junk)');
+      }
+      if (_hasShareLine(text)) problems.add('$label: share widget in step');
+    }
+    for (final junk in _junk) {
+      if (answer.contains(junk)) problems.add('$label: junk in answer ($junk)');
+    }
+    if (_hasShareLine(answer)) problems.add('$label: share widget in answer');
+  }
+
   final failing = <String>{};
   var taskTotal = 0;
   var pageRegressions = 0;
@@ -82,52 +130,6 @@ void main(List<String> args) {
       if (page + 2 < lastPage) pageRegressions++;
       lastPage = page > lastPage ? page : lastPage;
 
-      final condition = '${task['condition'] ?? ''}';
-      if (condition.trim().length < 20) {
-        problems.add('$textbookId $number: condition too short');
-      }
-      for (final junk in _junk) {
-        if (condition.contains(junk)) {
-          problems.add('$textbookId $number: junk in condition ($junk)');
-        }
-      }
-      if (_hasShareLine(condition)) {
-        problems.add('$textbookId $number: share widget in condition');
-      }
-      final solutions = (task['solutions'] as List?) ?? const [];
-      if (solutions.isEmpty) {
-        problems.add('$textbookId $number: no solution');
-        continue;
-      }
-      final solution = solutions.first as Map<String, dynamic>;
-      final steps = (solution['steps'] as List?) ?? const [];
-      final answer = '${solution['answer'] ?? ''}';
-      if (steps.isEmpty) problems.add('$textbookId $number: no steps');
-      if (answer.trim().isEmpty) {
-        problems.add('$textbookId $number: empty answer');
-      }
-      for (final step in steps) {
-        final text = '$step';
-        if (text.trim().isEmpty) {
-          problems.add('$textbookId $number: empty step');
-        }
-        for (final junk in _junk) {
-          if (text.contains(junk)) {
-            problems.add('$textbookId $number: junk in step ($junk)');
-          }
-        }
-        if (_hasShareLine(text)) {
-          problems.add('$textbookId $number: share widget in step');
-        }
-      }
-      for (final junk in _junk) {
-        if (answer.contains(junk)) {
-          problems.add('$textbookId $number: junk in answer ($junk)');
-        }
-      }
-      if (_hasShareLine(answer)) {
-        problems.add('$textbookId $number: share widget in answer');
-      }
     }
 
     numbers.sort();

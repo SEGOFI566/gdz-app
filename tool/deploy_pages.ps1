@@ -48,11 +48,37 @@ try {
   Push-Location $pages
   try {
     git init -b gh-pages | Out-Null
-    git add -A
-    git commit -m "Deploy web build" | Out-Null
+    git config user.name "gdz-app publisher"
+    git config user.email "publisher@users.noreply.github.com"
+    git config http.postBuffer 524288000
+    git config http.lowSpeedLimit 0
+    git config http.lowSpeedTime 999999
     git remote add origin "https://github.com/$Owner/$Repo.git"
+
+    # A fresh root commit makes GitHub receive the entire web build on every
+    # publish, which fails with HTTP 408. Parent the new commit on the current
+    # remote tip so only changed files are transferred.
+    Write-Host "=== fetch gh-pages tip ==="
+    $remoteTip = $null
+    git fetch --depth=1 origin gh-pages | Out-Host
+    if ($LASTEXITCODE -eq 0) {
+      $remoteTip = (git rev-parse FETCH_HEAD).Trim()
+    } else {
+      Write-Host "=== no remote gh-pages yet, creating first commit ==="
+    }
+
+    git add -A
+    $tree = (git write-tree).Trim()
+    if ($remoteTip) {
+      $commit = ("Deploy web build" | git commit-tree $tree -p $remoteTip).Trim()
+    } else {
+      $commit = ("Deploy web build" | git commit-tree $tree).Trim()
+    }
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    git update-ref refs/heads/gh-pages $commit
+
     Write-Host "=== git push gh-pages ==="
-    git push -f origin gh-pages
+    git push origin gh-pages
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   } finally {
     Pop-Location
