@@ -24,7 +24,7 @@ if errorlevel 1 goto failed
 
 echo ==== commit ==== >> %LOG%
 git add -A >> %LOG% 2>&1
-git commit -m "feat: add Telegram contact above Android download banner" >> %LOG% 2>&1
+git commit -m "feat: add real history textbooks and tasks from budu5" >> %LOG% 2>&1
 git push origin main >> %LOG% 2>&1
 echo ==== push exit=%ERRORLEVEL% ==== >> %LOG%
 
