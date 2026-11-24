@@ -28,6 +28,7 @@ $packageConfig = Join-Path $env:FLUTTER_ROOT "packages\flutter_tools\.dart_tool\
 # which makes every push fail with CRYPT_E_REVOCATION_OFFLINE. Git 2.56 ignores
 # http.schannelCheckRevoke=false, but GIT_SSL_NO_VERIFY works.
 $env:GIT_SSL_NO_VERIFY = "1"
+$env:GIT_TERMINAL_PROMPT = "0"
 
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Push-Location $root
@@ -59,9 +60,19 @@ try {
     # publish, which fails with HTTP 408. Parent the new commit on the current
     # remote tip so only changed files are transferred.
     Write-Host "=== fetch gh-pages tip ==="
+    # A plain shallow fetch sometimes dies with "fatal: early EOF" here and
+    # then hangs. Fetching only the commit/tree (no blobs) is enough for
+    # commit-tree and is much smaller; retry a few times on network errors.
     $remoteTip = $null
-    git fetch --depth=1 origin gh-pages | Out-Host
-    if ($LASTEXITCODE -eq 0) {
+    $fetched = $false
+    for ($attempt = 1; $attempt -le 3 -and -not $fetched; $attempt++) {
+      $lock = Join-Path (Get-Location) ".git\shallow.lock"
+      if (Test-Path $lock) { Remove-Item -Force $lock -ErrorAction SilentlyContinue }
+      git fetch --depth=1 --filter=blob:none --no-tags origin gh-pages | Out-Host
+      $fetched = ($LASTEXITCODE -eq 0)
+      if (-not $fetched -and $attempt -lt 3) { Start-Sleep -Seconds 2 }
+    }
+    if ($fetched) {
       $remoteTip = (git rev-parse FETCH_HEAD).Trim()
     } else {
       Write-Host "=== no remote gh-pages yet, creating first commit ==="
