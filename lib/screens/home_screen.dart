@@ -6,6 +6,7 @@ import '../theme.dart';
 import '../widgets/android_download_card.dart';
 import '../widgets/search_pill.dart';
 import '../widgets/subject_card.dart';
+import '../widgets/telegram_card.dart';
 import 'textbooks_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -74,6 +75,8 @@ class HomeScreen extends StatelessWidget {
           SearchPill(onTap: onOpenSearch),
           if (kIsWeb) ...[
             const SizedBox(height: 16),
+            const TelegramCard(),
+            const SizedBox(height: 10),
             const AndroidDownloadCard(),
           ],
           const SizedBox(height: 26),
