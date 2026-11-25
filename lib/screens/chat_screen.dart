@@ -22,7 +22,7 @@ class _ChatScreenState extends State<ChatScreen> {
     const ChatMessage(
       role: 'assistant',
       content:
-          'Привет! Я Big Pickle — помощник по ГДЗ. Спрашивай про учебники, '
+          'Привет! Я Твой господин — помощник по ГДЗ. Спрашивай про учебники, '
           'задания или предметы, и я постараюсь помочь.',
     ),
   ];
@@ -32,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
   static const ChatMessage _systemPrompt = ChatMessage(
     role: 'system',
     content:
-        'Ты Big Pickle — дружелюбный помощник на сайте ГДЗ. Отвечай по-русски, '
+        'Ты Твой господин — дружелюбный помощник на сайте ГДЗ. Отвечай по-русски, '
         'кратко и по делу. Помогай пользователям находить учебники, понимать '
         'задания и разбираться в школьных темах. Если не уверен в ответе, '
         'честно скажи об этом и не выдумывай факты.',
@@ -131,7 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Big Pickle',
+                        'Твой господин',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
@@ -318,7 +318,7 @@ class _TypingBubble extends StatelessWidget {
           border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Text(
-          'Big Pickle печатает...',
+          'Твой господин печатает...',
           style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
