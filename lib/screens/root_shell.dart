@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_state.dart';
 import '../theme.dart';
+import 'chat_screen.dart';
 import 'favorites_screen.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
@@ -34,6 +35,7 @@ class _RootShellState extends State<RootShell> {
           HomeScreen(onOpenSearch: () => setState(() => _index = 1)),
           const SearchScreen(),
           const FavoritesScreen(),
+          const ChatScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -54,6 +56,11 @@ class _RootShellState extends State<RootShell> {
             icon: Icon(Icons.bookmark_border_rounded),
             selectedIcon: Icon(Icons.bookmark_rounded),
             label: 'Избранное',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.smart_toy_outlined),
+            selectedIcon: Icon(Icons.smart_toy_rounded),
+            label: 'Помощник',
           ),
         ],
       ),

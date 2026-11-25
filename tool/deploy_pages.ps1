@@ -1,7 +1,8 @@
 param(
   [Parameter(Mandatory = $true)][string]$Owner,
   [string]$Repo = "gdz-app",
-  [string]$ApkUrl = ""
+  [string]$ApkUrl = "",
+  [string]$ChatApiUrl = ""
 )
 
 # Builds the web version with the correct base-href and publishes it to gh-pages.
@@ -35,6 +36,7 @@ Push-Location $root
 try {
   $arguments = @("build", "web", "--release", "--no-pub", "--base-href", "/$Repo/", "--no-web-resources-cdn")
   if ($ApkUrl) { $arguments += "--dart-define=APK_URL=$ApkUrl" }
+  if ($ChatApiUrl) { $arguments += "--dart-define=CHAT_API_URL=$ChatApiUrl" }
 
   Write-Host "=== flutter build web (direct tool) ==="
   & $dart --disable-dart-dev --packages=$packageConfig $snapshot @arguments
