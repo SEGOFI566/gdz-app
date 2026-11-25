@@ -16,6 +16,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
   String _query = '';
+  int? _grade;
+  String? _subjectId;
+  String? _textbookId;
 
   static const _popular = [
     '№ 527',
@@ -42,7 +45,12 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
-    final results = state.search(_query);
+    final results = state.search(
+      _query,
+      grade: _grade,
+      subjectId: _subjectId,
+      textbookId: _textbookId,
+    );
     final trimmed = _query.trim();
 
     return SafeArea(
@@ -91,6 +99,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
             ),
           ),
+          const SizedBox(height: 12),
+          _buildFilters(state),
           const SizedBox(height: 22),
           if (trimmed.isEmpty) ...[
             Text('Популярные запросы', style: sectionTitleStyle(context)),
@@ -150,6 +160,176 @@ class _SearchScreenState extends State<SearchScreen> {
             ],
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildFilters(AppState state) {
+    final data = state.catalog;
+    if (data == null) return const SizedBox.shrink();
+
+    final subjects = _grade == null
+        ? data.subjects
+        : data.subjectsForGrade(_grade!);
+    final textbooks = data.textbooks.where((t) {
+      if (_grade != null && t.grade != _grade) return false;
+      if (_subjectId != null && t.subjectId != _subjectId) return false;
+      return true;
+    }).toList()
+      ..sort((a, b) => a.title.compareTo(b.title));
+
+    final gradeLabel = _grade == null ? 'Все классы' : '$_grade класс';
+    final subjectLabel = _subjectId == null
+        ? 'Все предметы'
+        : (data.subjectById[_subjectId]?.name ?? 'Предмет');
+    final textbookLabel = _textbookId == null
+        ? 'Все учебники'
+        : (data.textbookById[_textbookId]?.title ?? 'Учебник');
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _filterMenu<int?>(
+          label: gradeLabel,
+          active: _grade != null,
+          items: [null, for (var g = 5; g <= 11; g++) g],
+          itemLabel: (v) => v == null ? 'Все классы' : '$v класс',
+          onSelected: (v) => setState(() {
+            _grade = v;
+            final newSubjects =
+                v == null ? data.subjects : data.subjectsForGrade(v);
+            if (_subjectId != null &&
+                !newSubjects.any((s) => s.id == _subjectId)) {
+              _subjectId = null;
+              _textbookId = null;
+            }
+            final newTextbooks = data.textbooks.where((t) {
+              if (v != null && t.grade != v) return false;
+              if (_subjectId != null && t.subjectId != _subjectId) return false;
+              return true;
+            });
+            if (_textbookId != null &&
+                !newTextbooks.any((t) => t.id == _textbookId)) {
+              _textbookId = null;
+            }
+          }),
+        ),
+        _filterMenu<String?>(
+          label: subjectLabel,
+          active: _subjectId != null,
+          items: [null, ...subjects.map((s) => s.id)],
+          itemLabel: (v) =>
+              v == null ? 'Все предметы' : (data.subjectById[v]?.name ?? v),
+          onSelected: (v) => setState(() {
+            _subjectId = v;
+            final newTextbooks = data.textbooks.where((t) {
+              if (_grade != null && t.grade != _grade) return false;
+              if (v != null && t.subjectId != v) return false;
+              return true;
+            });
+            if (_textbookId != null &&
+                !newTextbooks.any((t) => t.id == _textbookId)) {
+              _textbookId = null;
+            }
+          }),
+        ),
+        _filterMenu<String?>(
+          label: textbookLabel,
+          active: _textbookId != null,
+          items: [null, ...textbooks.map((t) => t.id)],
+          itemLabel: (v) {
+            if (v == null) return 'Все учебники';
+            final t = data.textbookById[v];
+            if (t == null) return v;
+            final title = t.title;
+            return title.length > 36 ? '${title.substring(0, 35)}…' : title;
+          },
+          onSelected: (v) => setState(() {
+            _textbookId = v;
+            if (v != null) {
+              final t = data.textbookById[v];
+              if (t != null) {
+                _grade = t.grade;
+                _subjectId = t.subjectId;
+              }
+            }
+          }),
+        ),
+        if (_grade != null || _subjectId != null || _textbookId != null)
+          ActionChip(
+            label: const Text('Сбросить'),
+            onPressed: () => setState(() {
+              _grade = null;
+              _subjectId = null;
+              _textbookId = null;
+            }),
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Color(0xFFE7E4EF)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            labelStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: kMuted,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _filterMenu<T>({
+    required String label,
+    required bool active,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required ValueChanged<T> onSelected,
+  }) {
+    final fg = active ? kAccent : kInk;
+    final bg = active ? kAccent.withValues(alpha: 0.10) : Colors.white;
+    final border =
+        active ? kAccent.withValues(alpha: 0.35) : const Color(0xFFE7E4EF);
+    return PopupMenuButton<T>(
+      tooltip: label,
+      onSelected: onSelected,
+      itemBuilder: (context) => [
+        for (final item in items)
+          PopupMenuItem<T>(
+            value: item,
+            child: Text(
+              itemLabel(item),
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 160),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: fg,
+                ),
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(Icons.arrow_drop_down_rounded, size: 18, color: fg),
+          ],
+        ),
       ),
     );
   }

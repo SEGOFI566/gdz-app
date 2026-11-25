@@ -10,6 +10,8 @@ import 'prefs.dart';
 class AppState extends ChangeNotifier {
   static const _gradeKey = 'selected_grade';
   static const _favoritesKey = 'favorite_task_ids';
+  static const _recentKey = 'recent_task_ids';
+  static const _recentLimit = 20;
 
   Catalog? catalog;
   bool loading = true;
@@ -17,8 +19,10 @@ class AppState extends ChangeNotifier {
   int grade = 5;
 
   final List<String> _favorites = [];
+  final List<String> _recent = [];
 
   List<String> get favorites => List.unmodifiable(_favorites);
+  List<String> get recent => List.unmodifiable(_recent);
 
   Future<void> init() async {
     try {
@@ -34,6 +38,12 @@ class AppState extends ChangeNotifier {
       if (savedFavorites != null) {
         _favorites.addAll(
           savedFavorites.where((id) => catalog!.taskById.containsKey(id)),
+        );
+      }
+      final savedRecent = prefs.getStringList(_recentKey);
+      if (savedRecent != null) {
+        _recent.addAll(
+          savedRecent.where((id) => catalog!.taskById.containsKey(id)),
         );
       }
     } catch (e) {
@@ -74,6 +84,28 @@ class AppState extends ChangeNotifier {
         .toList();
   }
 
+  List<TaskItem> get recentTasks {
+    final data = catalog;
+    if (data == null) return const [];
+    return _recent
+        .map((id) => data.taskById[id])
+        .whereType<TaskItem>()
+        .toList();
+  }
+
+  Future<void> markRecent(String taskId) async {
+    final data = catalog;
+    if (data == null || !data.taskById.containsKey(taskId)) return;
+    _recent.remove(taskId);
+    _recent.insert(0, taskId);
+    if (_recent.length > _recentLimit) {
+      _recent.removeRange(_recentLimit, _recent.length);
+    }
+    notifyListeners();
+    final prefs = await AppPrefs.getInstance();
+    await prefs.setStringList(_recentKey, _recent);
+  }
+
   List<Subject> subjectsForGrade(int value) =>
       catalog?.subjectsForGrade(value) ?? const [];
 
@@ -110,10 +142,26 @@ class AppState extends ChangeNotifier {
 
   /// Поиск по всему каталогу. Точные совпадения номера идут первыми,
   /// затем номера, содержащие запрос, затем совпадения по тексту.
-  List<TaskItem> search(String query, {int limit = 50}) {
+  /// Можно ограничить поиск классом, предметом или учебником.
+  List<TaskItem> search(
+    String query, {
+    int limit = 50,
+    int? grade,
+    String? subjectId,
+    String? textbookId,
+  }) {
     final data = catalog;
     final text = query.trim().toLowerCase();
     if (data == null || text.isEmpty) return const [];
+
+    bool matchesFilters(TaskItem task) {
+      final textbook = data.textbookById[task.textbookId];
+      if (textbook == null) return false;
+      if (textbookId != null && textbook.id != textbookId) return false;
+      if (subjectId != null && textbook.subjectId != subjectId) return false;
+      if (grade != null && textbook.grade != grade) return false;
+      return true;
+    }
 
     final number = numberQuery(text);
     final exact = <TaskItem>[];
@@ -121,6 +169,7 @@ class AppState extends ChangeNotifier {
     final byText = <TaskItem>[];
 
     for (final task in data.tasks) {
+      if (!matchesFilters(task)) continue;
       if (number != null && task.number == number) {
         exact.add(task);
         continue;

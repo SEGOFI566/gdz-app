@@ -16,6 +16,30 @@ class TaskScreen extends StatefulWidget {
 
 class _TaskScreenState extends State<TaskScreen> {
   bool _revealed = false;
+  String? _markedRecentFor;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _markRecent());
+  }
+
+  @override
+  void didUpdateWidget(covariant TaskScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.taskId != widget.taskId) {
+      _revealed = false;
+      _markedRecentFor = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _markRecent());
+    }
+  }
+
+  void _markRecent() {
+    if (!mounted) return;
+    if (_markedRecentFor == widget.taskId) return;
+    _markedRecentFor = widget.taskId;
+    AppScope.of(context).markRecent(widget.taskId);
+  }
 
   @override
   Widget build(BuildContext context) {

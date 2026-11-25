@@ -6,7 +6,9 @@ import '../theme.dart';
 import '../widgets/android_download_card.dart';
 import '../widgets/search_pill.dart';
 import '../widgets/subject_card.dart';
+import '../widgets/task_tile.dart';
 import '../widgets/telegram_card.dart';
+import 'task_screen.dart';
 import 'textbooks_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,6 +20,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final subjects = state.subjectsForGrade(state.grade);
+    final recent = state.recentTasks.take(5).toList();
 
     return SafeArea(
       bottom: false,
@@ -78,6 +81,33 @@ class HomeScreen extends StatelessWidget {
             const TelegramCard(),
             const SizedBox(height: 10),
             const AndroidDownloadCard(),
+          ],
+          if (recent.isNotEmpty) ...[
+            const SizedBox(height: 26),
+            Row(
+              children: [
+                Text('Недавно смотрели', style: sectionTitleStyle(context)),
+                const Spacer(),
+                Text(
+                  plural(recent.length, 'задание', 'задания', 'заданий'),
+                  style: const TextStyle(fontSize: 13, color: kMuted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            for (final task in recent) ...[
+              TaskTile(
+                task: task,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => TaskScreen(taskId: task.id),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
           ],
           const SizedBox(height: 26),
           Row(
