@@ -24,7 +24,7 @@ class TaskTile extends StatelessWidget {
     final favorite = state.isFavorite(task.id);
 
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -32,7 +32,7 @@ class TaskTile extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE7E4EF)),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           padding: const EdgeInsets.all(14),
           child: Row(
@@ -76,9 +76,9 @@ class TaskTile extends StatelessWidget {
                       task.condition,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: kInk,
+                        color: Theme.of(context).colorScheme.onSurface,
                         height: 1.35,
                       ),
                     ),
@@ -90,7 +90,7 @@ class TaskTile extends StatelessWidget {
                             : '${textbook.title} · стр. ${task.page}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11, color: kMuted),
+                        style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ],
@@ -101,7 +101,7 @@ class TaskTile extends StatelessWidget {
                 favorite
                     ? Icons.bookmark_rounded
                     : Icons.chevron_right_rounded,
-                color: favorite ? color : kMuted,
+                color: favorite ? color : Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
               ),
             ],

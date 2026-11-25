@@ -19,19 +19,19 @@ class FavoritesScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
         children: [
-          const Text(
+          Text(
             'Избранное',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
-              color: kInk,
+              color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Задания, которые ты сохранил для повторения',
-            style: TextStyle(fontSize: 13, color: kMuted),
+            style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 20),
           if (tasks.isEmpty)
@@ -48,7 +48,7 @@ class FavoritesScreen extends StatelessWidget {
                 const Spacer(),
                 Text(
                   plural(tasks.length, 'задание', 'задания', 'заданий'),
-                  style: const TextStyle(fontSize: 13, color: kMuted),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
             ),

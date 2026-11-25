@@ -58,19 +58,19 @@ class _SearchScreenState extends State<SearchScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
         children: [
-          const Text(
+          Text(
             'Поиск',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
-              color: kInk,
+              color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Номер задания, условие, учебник или тема. Номер можно вводить без «№».',
-            style: TextStyle(fontSize: 13, color: kMuted),
+            style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -89,13 +89,13 @@ class _SearchScreenState extends State<SearchScreen> {
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: 'Например: № 124 или уравнение',
-              prefixIcon: const Icon(Icons.search_rounded, color: kMuted),
+              prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
               suffixIcon: trimmed.isEmpty
                   ? null
                   : IconButton(
                       tooltip: 'Очистить',
                       onPressed: () => _setQuery(''),
-                      icon: const Icon(Icons.close_rounded, color: kMuted),
+                      icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
             ),
           ),
@@ -113,15 +113,15 @@ class _SearchScreenState extends State<SearchScreen> {
                   ActionChip(
                     label: Text(query),
                     onPressed: () => _setQuery(query),
-                    backgroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     side: const BorderSide(color: Color(0xFFE7E4EF)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    labelStyle: const TextStyle(
+                    labelStyle: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: kInk,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
               ],
@@ -140,7 +140,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 const Spacer(),
                 Text(
                   plural(results.length, 'задание', 'задания', 'заданий'),
-                  style: const TextStyle(fontSize: 13, color: kMuted),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -258,21 +258,21 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         if (_grade != null || _subjectId != null || _textbookId != null)
           ActionChip(
-            label: const Text('Сбросить'),
+            label: Text('Сбросить'),
             onPressed: () => setState(() {
               _grade = null;
               _subjectId = null;
               _textbookId = null;
             }),
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             side: const BorderSide(color: Color(0xFFE7E4EF)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            labelStyle: const TextStyle(
+            labelStyle: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: kMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
       ],
@@ -286,10 +286,10 @@ class _SearchScreenState extends State<SearchScreen> {
     required String Function(T) itemLabel,
     required ValueChanged<T> onSelected,
   }) {
-    final fg = active ? kAccent : kInk;
+    final fg = active ? kAccent : Theme.of(context).colorScheme.onSurface;
     final bg = active ? kAccent.withValues(alpha: 0.10) : Colors.white;
     final border =
-        active ? kAccent.withValues(alpha: 0.35) : const Color(0xFFE7E4EF);
+        active ? kAccent.withValues(alpha: 0.35) : Theme.of(context).colorScheme.outlineVariant;
     return PopupMenuButton<T>(
       tooltip: label,
       onSelected: onSelected,
@@ -299,7 +299,7 @@ class _SearchScreenState extends State<SearchScreen> {
             value: item,
             child: Text(
               itemLabel(item),
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 14),
             ),
           ),
       ],

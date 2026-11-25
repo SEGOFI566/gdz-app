@@ -20,7 +20,7 @@ class TelegramCard extends StatelessWidget {
             children: [
               const Icon(Icons.send, color: Color(0xFF2AABEE), size: 20),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'тг @sygofi',
                   style: TextStyle(

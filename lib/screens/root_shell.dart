@@ -109,19 +109,19 @@ class _ErrorScreen extends StatelessWidget {
               const Icon(Icons.error_outline_rounded,
                   color: Color(0xFFDC2626), size: 48),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Что-то пошло не так',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: kInk,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: kMuted),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -160,7 +160,7 @@ class _Logo extends StatelessWidget {
       child: Text(
         'ГДЗ',
         style: TextStyle(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           fontSize: size * 0.30,
           fontWeight: FontWeight.w900,
           letterSpacing: -0.5,

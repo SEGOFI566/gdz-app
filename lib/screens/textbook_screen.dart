@@ -97,7 +97,7 @@ class _TextbookScreenState extends State<TextbookScreen> {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (_) => _PagePicker(
         pageCount: pageCount,
         current: _page.clamp(0, pageCount - 1).toInt(),
@@ -120,7 +120,7 @@ class _TextbookScreenState extends State<TextbookScreen> {
 
     if (textbook == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Учебник')),
+        appBar: AppBar(title: Text('Учебник')),
         body: const EmptyState(
           icon: Icons.search_off_rounded,
           title: 'Учебник не найден',
@@ -163,12 +163,12 @@ class _TextbookScreenState extends State<TextbookScreen> {
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Быстрый поиск: № 527 или слово из задания',
-              prefixIcon: const Icon(Icons.bolt_rounded, color: kMuted),
+              prefixIcon: Icon(Icons.bolt_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
               suffixIcon: searching
                   ? IconButton(
                       tooltip: 'Сбросить поиск',
                       onPressed: _clearSearch,
-                      icon: const Icon(Icons.close_rounded, color: kMuted),
+                      icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     )
                   : null,
             ),
@@ -185,12 +185,12 @@ class _TextbookScreenState extends State<TextbookScreen> {
               if (searching)
                 Text(
                   'найдено ${matches.length}',
-                  style: const TextStyle(fontSize: 13, color: kMuted),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 )
               else if (tasks.isEmpty)
                 Text(
                   plural(tasks.length, 'задание', 'задания', 'заданий'),
-                  style: const TextStyle(fontSize: 13, color: kMuted),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 )
               else
                 _RangePill(
@@ -263,9 +263,9 @@ class _BookHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFE7E4EF)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +284,7 @@ class _BookHeader extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.menu_book_rounded,
+                Icon(Icons.menu_book_rounded,
                     color: Colors.white, size: 30),
                 const SizedBox(height: 6),
                 Text(
@@ -305,17 +305,17 @@ class _BookHeader extends StatelessWidget {
               children: [
                 Text(
                   textbook.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: kInk,
+                    color: Theme.of(context).colorScheme.onSurface,
                     height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   textbook.author,
-                  style: const TextStyle(fontSize: 13, color: kMuted),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
@@ -366,17 +366,17 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: kPaper,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: kMuted),
+          Icon(icon, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Text(
             text,
-            style: const TextStyle(fontSize: 11, color: kMuted),
+            style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -395,18 +395,18 @@ class _HintCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE7E4EF)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
-          Icon(icon, color: kMuted),
+          Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 13, color: kMuted),
+              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
         ],
@@ -442,7 +442,7 @@ class _TaskNumber extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: highlight ? color : const Color(0xFFE7E4EF),
+              color: highlight ? color : Theme.of(context).colorScheme.outlineVariant,
               width: highlight ? 1.6 : 1,
             ),
           ),
@@ -454,7 +454,7 @@ class _TaskNumber extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: highlight ? color : kInk,
+                    color: highlight ? color : Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -555,14 +555,14 @@ class _PagePicker extends StatelessWidget {
                   const Spacer(),
                   Text(
                     '$total заданий',
-                    style: const TextStyle(fontSize: 13, color: kMuted),
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Нажми на страницу, чтобы сразу перейти к её заданиям.',
-                style: TextStyle(fontSize: 13, color: kMuted),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               Flexible(
@@ -612,7 +612,7 @@ class _PageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? color : kPaper,
+      color: selected ? color : Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -621,7 +621,7 @@ class _PageTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected ? color : const Color(0xFFE7E4EF),
+              color: selected ? color : Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -636,7 +636,9 @@ class _PageTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: selected ? Colors.white : kInk,
+                      color: selected
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -647,7 +649,7 @@ class _PageTile extends StatelessWidget {
                       fontSize: 10,
                       color: selected
                           ? Colors.white.withValues(alpha: 0.85)
-                          : kMuted,
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -701,9 +703,9 @@ class _Pager extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE7E4EF)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
@@ -721,9 +723,9 @@ class _Pager extends StatelessWidget {
               children: [
                 for (final item in _items)
                   if (item == null)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(horizontal: 2),
-                      child: Text('…', style: TextStyle(color: kMuted)),
+                      child: Text('…', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     )
                   else
                     _PageChip(
@@ -773,7 +775,7 @@ class _PagerArrow extends StatelessWidget {
       tooltip: tooltip,
       onPressed: enabled ? onTap : null,
       icon: Icon(icon),
-      color: kInk,
+      color: Theme.of(context).colorScheme.onSurface,
       disabledColor: const Color(0xFFC9C5D6),
       visualDensity: VisualDensity.compact,
     );
@@ -796,7 +798,7 @@ class _PageChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? color : kPaper,
+      color: selected ? color : Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         onTap: onTap,
@@ -810,7 +812,7 @@ class _PageChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: selected ? Colors.white : kInk,
+              color: selected ? Colors.white : Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),

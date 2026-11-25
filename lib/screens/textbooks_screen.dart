@@ -31,10 +31,10 @@ class TextbooksScreen extends StatelessWidget {
             Text(subject?.name ?? 'Предмет'),
             Text(
               '$grade класс',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: kMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -134,7 +134,7 @@ class _SubjectHeader extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 19,
                     fontWeight: FontWeight.w800,
@@ -151,7 +151,7 @@ class _SubjectHeader extends StatelessWidget {
             ),
             child: Text(
               '$count',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
                 fontSize: 14,

@@ -19,7 +19,7 @@ class SubjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = subject.color;
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -55,10 +55,10 @@ class SubjectCard extends StatelessWidget {
                 subject.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: kInk,
+                  color: Theme.of(context).colorScheme.onSurface,
                   height: 1.15,
                 ),
               ),
@@ -67,7 +67,7 @@ class SubjectCard extends StatelessWidget {
                 textbookCount == 0
                     ? 'скоро'
                     : plural(textbookCount, 'учебник', 'учебника', 'учебников'),
-                style: const TextStyle(fontSize: 12, color: kMuted),
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),

@@ -48,7 +48,7 @@ class _TaskScreenState extends State<TaskScreen> {
 
     if (task == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Задание')),
+        appBar: AppBar(title: Text('Задание')),
         body: const EmptyState(
           icon: Icons.search_off_rounded,
           title: 'Задание не найдено',
@@ -76,7 +76,7 @@ class _TaskScreenState extends State<TaskScreen> {
               favorite
                   ? Icons.bookmark_rounded
                   : Icons.bookmark_border_rounded,
-              color: favorite ? accent : kInk,
+              color: favorite ? accent : Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(width: 4),
@@ -109,9 +109,9 @@ class _TaskScreenState extends State<TaskScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: const Color(0xFFE7E4EF)),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,10 +139,10 @@ class _TaskScreenState extends State<TaskScreen> {
                     const Spacer(),
                     Text(
                       '№ ${task.number}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
-                        color: kMuted,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -150,9 +150,9 @@ class _TaskScreenState extends State<TaskScreen> {
                 const SizedBox(height: 14),
                 Text(
                   task.condition,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    color: kInk,
+                    color: Theme.of(context).colorScheme.onSurface,
                     height: 1.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -161,7 +161,7 @@ class _TaskScreenState extends State<TaskScreen> {
                   const SizedBox(height: 14),
                   Text(
                     '${textbook.title} · ${textbook.author}',
-                    style: const TextStyle(fontSize: 12, color: kMuted),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                 ],
               ],
@@ -172,18 +172,18 @@ class _TaskScreenState extends State<TaskScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: const Color(0xFFE7E4EF)),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.pending_actions_rounded, color: kMuted),
+                  Icon(Icons.pending_actions_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Решение для этого задания ещё готовится.',
-                      style: TextStyle(fontSize: 13, color: kMuted),
+                      style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ],
@@ -220,13 +220,13 @@ class _TaskScreenState extends State<TaskScreen> {
                 Icon(Icons.lightbulb_outline_rounded,
                     size: 20, color: accent),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Сначала попробуй решить сам, а решение используй для '
                     'проверки. Так знания останутся с тобой.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: kMuted,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.45,
                     ),
                   ),
@@ -252,9 +252,9 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE7E4EF)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -263,10 +263,10 @@ class _Chip extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: kMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -313,19 +313,19 @@ class _LockedSolution extends StatelessWidget {
             child: Icon(Icons.visibility_rounded, color: accent, size: 26),
           ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'Решение готово',
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
-              color: kInk,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Пошаговый разбор с ответом и пояснениями',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: kMuted),
+            style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -333,7 +333,7 @@ class _LockedSolution extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onReveal,
               icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-              label: const Text('Показать решение'),
+              label: Text('Показать решение'),
               style: FilledButton.styleFrom(
                 backgroundColor: accent,
                 foregroundColor: Colors.white,
@@ -341,7 +341,7 @@ class _LockedSolution extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                textStyle: const TextStyle(
+                textStyle: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -374,9 +374,9 @@ class _SolutionView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE7E4EF)),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,10 +388,10 @@ class _SolutionView extends StatelessWidget {
                   TextButton.icon(
                     onPressed: onHide,
                     icon: const Icon(Icons.visibility_off_rounded, size: 16),
-                    label: const Text('Скрыть'),
+                    label: Text('Скрыть'),
                     style: TextButton.styleFrom(
-                      foregroundColor: kMuted,
-                      textStyle: const TextStyle(
+                      foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                      textStyle: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -427,9 +427,9 @@ class _SolutionView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           solution.steps[i],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14.5,
-                            color: kInk,
+                            color: Theme.of(context).colorScheme.onSurface,
                             height: 1.5,
                           ),
                         ),
@@ -450,12 +450,12 @@ class _SolutionView extends StatelessWidget {
                   children: [
                     Icon(Icons.check_circle_rounded, color: accent, size: 20),
                     const SizedBox(width: 8),
-                    const Text(
+                    Text(
                       'Ответ:',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: kInk,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -478,22 +478,22 @@ class _SolutionView extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Icon(Icons.verified_user_rounded, size: 16, color: kMuted),
+            Icon(Icons.verified_user_rounded, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 6),
             Expanded(
               child: Text(
                 '${solution.author} · проверено редакцией',
-                style: const TextStyle(fontSize: 12, color: kMuted),
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ),
             const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF59E0B)),
             const SizedBox(width: 3),
             Text(
               solution.rating.toStringAsFixed(1),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: kInk,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],

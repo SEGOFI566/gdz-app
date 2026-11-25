@@ -18,7 +18,7 @@ class TextbookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -26,7 +26,7 @@ class TextbookCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE7E4EF)),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -39,7 +39,7 @@ class TextbookCard extends StatelessWidget {
                   color: textbook.color,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.menu_book_rounded,
                   color: Colors.white,
                   size: 26,
@@ -54,10 +54,10 @@ class TextbookCard extends StatelessWidget {
                       textbook.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: kInk,
+                        color: Theme.of(context).colorScheme.onSurface,
                         height: 1.2,
                       ),
                     ),
@@ -66,7 +66,7 @@ class TextbookCard extends StatelessWidget {
                       textbook.author,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13, color: kMuted),
+                      style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -80,14 +80,14 @@ class TextbookCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           '${textbook.year}',
-                          style: const TextStyle(fontSize: 12, color: kMuted),
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: kMuted),
+              Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ],
           ),
         ),

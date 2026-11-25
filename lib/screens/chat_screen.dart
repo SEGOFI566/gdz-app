@@ -126,7 +126,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: const Icon(Icons.smart_toy_rounded, color: kAccent),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -135,14 +135,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
-                          color: kInk,
+                          color: Theme.of(context).colorScheme.onSurface,
                           letterSpacing: -0.4,
                         ),
                       ),
                       SizedBox(height: 2),
                       Text(
                         'Помощник, который отвечает на вопросы',
-                        style: TextStyle(fontSize: 13, color: kMuted),
+                        style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -161,7 +161,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: const Color(0xFFFED7AA)),
                 ),
-                child: const Text(
+                child: Text(
                   'Чат ещё не подключён. Соберите web с параметром '
                   '--dart-define=CHAT_API_URL=https://ваш-прокси/chat '
                   'и разверните прокси с API-ключом.',
@@ -195,9 +195,11 @@ class _ChatScreenState extends State<ChatScreen> {
               12 + MediaQuery.of(context).viewInsets.bottom * 0.0 +
                   MediaQuery.of(context).padding.bottom,
             ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Color(0xFFEAE7F2))),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -258,8 +260,8 @@ class _ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == 'user';
-    final bg = isUser ? kAccent : Colors.white;
-    final fg = isUser ? Colors.white : kInk;
+    final bg = isUser ? kAccent : Theme.of(context).colorScheme.surface;
+    final fg = isUser ? Colors.white : Theme.of(context).colorScheme.onSurface;
     final align = isUser ? Alignment.centerRight : Alignment.centerLeft;
     final radius = BorderRadius.only(
       topLeft: const Radius.circular(18),
@@ -282,7 +284,7 @@ class _ChatBubble extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: radius,
-          border: isUser ? null : Border.all(color: const Color(0xFFEAE7F2)),
+          border: isUser ? null : Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -311,13 +313,13 @@ class _TypingBubble extends StatelessWidget {
         margin: const EdgeInsets.only(top: 4, bottom: 4, right: 48),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFEAE7F2)),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
-        child: const Text(
+        child: Text(
           'Big Pickle печатает...',
-          style: TextStyle(fontSize: 13, color: kMuted),
+          style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
     );

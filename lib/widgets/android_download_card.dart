@@ -49,7 +49,7 @@ class AndroidDownloadCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Приложение для Android',
                   style: TextStyle(
                     fontSize: 15,
@@ -72,7 +72,7 @@ class AndroidDownloadCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () => openApkDownload(kAndroidApkPath),
                     icon: const Icon(Icons.download_rounded, size: 18),
-                    label: const Text('Скачать APK'),
+                    label: Text('Скачать APK'),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF3DDC84),
                       foregroundColor: const Color(0xFF0B1220),
@@ -80,7 +80,7 @@ class AndroidDownloadCard extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      textStyle: const TextStyle(
+                      textStyle: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                       ),

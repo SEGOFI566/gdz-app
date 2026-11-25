@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'models.dart';
 import 'prefs.dart';
@@ -12,11 +12,13 @@ class AppState extends ChangeNotifier {
   static const _favoritesKey = 'favorite_task_ids';
   static const _recentKey = 'recent_task_ids';
   static const _recentLimit = 20;
+  static const _themeKey = 'theme_mode';
 
   Catalog? catalog;
   bool loading = true;
   String? error;
   int grade = 5;
+  ThemeMode themeMode = ThemeMode.system;
 
   final List<String> _favorites = [];
   final List<String> _recent = [];
@@ -46,6 +48,12 @@ class AppState extends ChangeNotifier {
           savedRecent.where((id) => catalog!.taskById.containsKey(id)),
         );
       }
+      final savedTheme = prefs.getInt(_themeKey);
+      if (savedTheme != null &&
+          savedTheme >= 0 &&
+          savedTheme < ThemeMode.values.length) {
+        themeMode = ThemeMode.values[savedTheme];
+      }
     } catch (e) {
       error = 'Не удалось загрузить каталог: $e';
     } finally {
@@ -60,6 +68,19 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     final prefs = await AppPrefs.getInstance();
     await prefs.setInt(_gradeKey, value);
+  }
+
+  Future<void> setThemeMode(ThemeMode value) async {
+    if (themeMode == value) return;
+    themeMode = value;
+    notifyListeners();
+    final prefs = await AppPrefs.getInstance();
+    await prefs.setInt(_themeKey, value.index);
+  }
+
+  Future<void> toggleThemeMode() async {
+    final next = themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    await setThemeMode(next);
   }
 
   bool isFavorite(String taskId) => _favorites.contains(taskId);

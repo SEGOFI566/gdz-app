@@ -36,11 +36,16 @@ class _GdzAppState extends State<GdzApp> {
   Widget build(BuildContext context) {
     return AppScope(
       state: _state,
-      child: MaterialApp(
-        title: 'ГДЗ — готовые домашние задания',
-        debugShowCheckedModeBanner: false,
-        theme: buildTheme(),
-        home: const RootShell(),
+      child: AnimatedBuilder(
+        animation: _state,
+        builder: (context, _) => MaterialApp(
+          title: 'ГДЗ — готовые домашние задания',
+          debugShowCheckedModeBanner: false,
+          theme: buildTheme(),
+          darkTheme: buildDarkTheme(),
+          themeMode: _state.themeMode,
+          home: const RootShell(),
+        ),
       ),
     );
   }

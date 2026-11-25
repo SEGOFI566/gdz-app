@@ -21,6 +21,7 @@ class HomeScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final subjects = state.subjectsForGrade(state.grade);
     final recent = state.recentTasks.take(5).toList();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SafeArea(
       bottom: false,
@@ -41,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(13),
                 ),
-                child: const Text(
+                child: Text(
                   'ГДЗ',
                   style: TextStyle(
                     color: Colors.white,
@@ -51,7 +52,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -60,16 +61,28 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: kInk,
+                        color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: -0.3,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Выбери класс, предмет и задание',
-                      style: TextStyle(fontSize: 13, color: kMuted),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
+                ),
+              ),
+              IconButton(
+                tooltip: isDark ? 'Светлая тема' : 'Тёмная тема',
+                onPressed: () => state.setThemeMode(
+                  isDark ? ThemeMode.light : ThemeMode.dark,
+                ),
+                icon: Icon(
+                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
                 ),
               ),
             ],
@@ -90,7 +103,7 @@ class HomeScreen extends StatelessWidget {
                 const Spacer(),
                 Text(
                   plural(recent.length, 'задание', 'задания', 'заданий'),
-                  style: const TextStyle(fontSize: 13, color: kMuted),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -116,7 +129,7 @@ class HomeScreen extends StatelessWidget {
               const Spacer(),
               Text(
                 '${state.grade} класс',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: kAccent,
@@ -141,12 +154,14 @@ class HomeScreen extends StatelessWidget {
                   onSelected: (_) => state.setGrade(grade),
                   labelStyle: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: selected ? Colors.white : kInk,
+                    color: selected
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurface,
                   ),
                   selectedColor: kAccent,
-                  backgroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
                   side: BorderSide(
-                    color: selected ? kAccent : const Color(0xFFE7E4EF),
+                    color: selected ? kAccent : Theme.of(context).colorScheme.outlineVariant,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -164,7 +179,7 @@ class HomeScreen extends StatelessWidget {
               const Spacer(),
               Text(
                 plural(subjects.length, 'предмет', 'предмета', 'предметов'),
-                style: const TextStyle(fontSize: 13, color: kMuted),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -217,19 +232,19 @@ class _EmptyGrade extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE7E4EF)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.hourglass_empty_rounded, color: kMuted),
+          Icon(Icons.hourglass_empty_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
           SizedBox(width: 12),
           Expanded(
             child: Text(
               'Для этого класса материалы ещё готовятся. '
               'Попробуй выбрать другой класс.',
-              style: TextStyle(fontSize: 13, color: kMuted, height: 1.4),
+              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4),
             ),
           ),
         ],
@@ -246,13 +261,13 @@ class _HowItWorksCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: kInk,
+        color: const Color(0xFF1B1B22),
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.verified_rounded, color: Color(0xFF9B8CFF), size: 20),
               SizedBox(width: 8),
